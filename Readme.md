@@ -1,6 +1,10 @@
 
 # Build
 
+you can use the binary `main.exe` if you don't want to build from scratch. 
+
+*To build*
+
 1) Install latest chrome
 
 2) Install go/golang and godep
