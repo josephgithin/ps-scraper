@@ -120,7 +120,7 @@ func getClipPlayerUrls(ctxt context.Context, c *chromedp.CDP, courseName string,
 	courseURL := fmt.Sprintf(`%v?course=%v`, baseurl, courseName)
 
 	waitToLoad(ctxt, c, courseURL)
-
+	c.Run(ctxt, chromedp.Sleep(2*time.Second))
 	c.Run(ctxt, chromedp.Click(`#vjs_video_3`, chromedp.NodeVisible, chromedp.ByID))
 
 	var moduleCount int
