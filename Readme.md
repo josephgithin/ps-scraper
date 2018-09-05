@@ -35,4 +35,4 @@ play the very first video in the table of contents.
 
 https://app.pluralsight.com/player?course=course-1-name&author=author&**name=course-1-name-m0**&clip=0&mode=live
 
-*course=course-1-name-m0*
+*name=course-1-name-m0*
