@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	scraper "alienz.in/ps-scraper/scraper"
 	"github.com/akamensky/argparse"
@@ -28,7 +29,11 @@ func main() {
 
 	for i, course := range *courses {
 		log.Printf("Scrapping course %v : %v\n", i, course)
-		scraper.PsScrap(*user, *password, course)
+		s1 := strings.Split(course, "-")
+		firstModule := s1[len(s1)-1]
+		s1 = s1[:len(s1)-1]
+		course := strings.Join(s1[:], "-")
+		scraper.PsScrap(*user, *password, course, firstModule)
 	}
 
 }
