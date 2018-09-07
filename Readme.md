@@ -30,9 +30,9 @@ chrome browser will be automatically opened/closed while scraping.
 
 ### To extract course name 
 
-visit the page of the course and extract the name attribute.
-play the very first video in the table of contents.
+visit the page of the course and extract the course attribute.
+play the video.
 
-https://app.pluralsight.com/player?course=course-1-name&author=author&**name=course-1-name-m0**&clip=0&mode=live
+https://app.pluralsight.com/player?**course=course-1-name**&author=author&name=course-1-name-m0&clip=0&mode=live
 
-*name=course-1-name-m0*
+*course=course-1-name*
