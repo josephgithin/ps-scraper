@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +18,7 @@ import (
 )
 
 //PsScrap is a  scrapper
-func PsScrap(userName string, password string, courseName string, firstModule string) {
+func PsScrap(userName string, password string, courseName string) {
 
 	var err error
 
@@ -39,7 +38,7 @@ func PsScrap(userName string, password string, courseName string, firstModule st
 		log.Fatal(err)
 	}
 
-	urlIndex, urlMap := getClipPlayerUrls(ctxt, c, courseName, firstModule)
+	urlIndex, urlMap := getClipPlayerUrlsV2(ctxt, c, courseName)
 
 	// c.Run(ctxt, chromedp.Click(`#play-control`))
 	stateFileName := courseName + ".state"
@@ -114,69 +113,44 @@ func doLogin(userName string, password string) chromedp.Tasks {
 	}
 }
 
-func getClipPlayerUrls(ctxt context.Context, c *chromedp.CDP, courseName string, firstModule string) (map[int]string, map[string]string) {
-
-	baseurl := "https://app.pluralsight.com/player"
-	courseURL := fmt.Sprintf(`%v?course=%v`, baseurl, courseName)
-
-	waitToLoad(ctxt, c, courseURL)
-	c.Run(ctxt, chromedp.Sleep(2*time.Second))
-	c.Run(ctxt, chromedp.Click(`#vjs_video_3`, chromedp.NodeVisible, chromedp.ByID))
-
-	var moduleCount int
-
-	c.Run(ctxt, chromedp.Sleep(1*time.Second))
-	c.Run(ctxt, chromedp.EvaluateAsDevTools("document.getElementsByClassName('module').length", &moduleCount))
-	log.Printf("moduleCount=" + string(moduleCount))
-	c.Run(ctxt, chromedp.Sleep(1*time.Second))
-	moduleClipMap := make(map[string]int)
+func getClipPlayerUrlsV2(ctxt context.Context, c *chromedp.CDP, courseName string) (map[int]string, map[string]string) {
+	tableOfContentsURL := "https://app.pluralsight.com/library/courses/%s/table-of-contents"
 
 	urlIndex := make(map[int]string)
 	urlmap := make(map[string]string)
 
-	re := regexp.MustCompile("[0-9]+")
+	c.Run(ctxt, chromedp.Navigate(fmt.Sprintf(tableOfContentsURL, courseName)))
+	c.Run(ctxt, chromedp.Sleep(2*time.Second))
+	c.Run(ctxt, chromedp.WaitReady(`a.accordian__action`))
+	c.Run(ctxt, chromedp.Sleep(2*time.Second))
+	var isOpen bool
+	c.Run(ctxt, chromedp.EvaluateAsDevTools("document.getElementsByClassName('accordian__action')[0].click()", &isOpen))
+	var moduleCount int
+	c.Run(ctxt, chromedp.EvaluateAsDevTools("document.getElementsByClassName('accordian__section--open').length", &moduleCount))
+
 	counter := 0
-	firstModuleIndex, err := strconv.Atoi(re.FindAllString(firstModule, -1)[0])
+	for i := 0; i < moduleCount; i++ {
 
-	if err != nil {
-		log.Println("Error parsing firstmoduleIndex")
-	} else {
+		var clipCount int
+		c.Run(ctxt, chromedp.EvaluateAsDevTools(fmt.Sprintf("document.getElementsByClassName('accordian__section--open')[%v].children[1].children[0].children.length", i), &clipCount))
+		fmt.Print("clipcount")
+		fmt.Println(clipCount)
+		c.Run(ctxt, chromedp.Sleep(1*time.Second))
 
-		for i := 0; i < moduleCount; i++ {
-
-			log.Println(i)
-
-			var isOpen bool
-			c.Run(ctxt, chromedp.Sleep(1*time.Second))
-
-			c.Run(ctxt, chromedp.EvaluateAsDevTools(fmt.Sprintf("document.getElementsByClassName('module')[%v].classList.contains('open')", i), &isOpen))
-
-			if isOpen != true {
-				log.Println("isNotOpen")
-				c.Run(ctxt, chromedp.EvaluateAsDevTools(fmt.Sprintf("document.getElementsByClassName('module')[%v].children[0].click()", i), &isOpen))
-
-			}
-
-			c.Run(ctxt, chromedp.Sleep(1*time.Second))
-
-			var clipCount int
-			c.Run(ctxt, chromedp.EvaluateAsDevTools(fmt.Sprintf("document.getElementsByClassName('module')[%v].children[1].children.length", i),
-				&clipCount))
-			moduleClipMap[fmt.Sprintf("m%v", i+firstModuleIndex)] = clipCount
-			for j := 0; j < clipCount; j++ {
-				clipurl := fmt.Sprintf("%v?course=%v&name=%v&clip=%v", baseurl, courseName,
-					courseName+fmt.Sprintf("-m%v", i+firstModuleIndex), j)
-				log.Println(clipurl)
-
-				urlIndex[counter] = fmt.Sprintf("%v-%v", i+firstModuleIndex, j)
-				urlmap[fmt.Sprintf("%v-%v", i+firstModuleIndex, j)] = clipurl
-				counter = counter + 1
-			}
+		for j := 0; j < clipCount; j++ {
+			var url string
+			c.Run(ctxt, chromedp.EvaluateAsDevTools(fmt.Sprintf("document.getElementsByClassName('accordian__section--open')[%v].children[1].children[0].children[%v].children[0].getAttribute('href')", i, j), &url))
+			clipurl := "https://app.pluralsight.com" + url
+			fmt.Print("url")
+			fmt.Println(clipurl)
+			urlIndex[counter] = fmt.Sprintf("%v-%v", i, j)
+			urlmap[fmt.Sprintf("%v-%v", i, j)] = clipurl
+			counter = counter + 1
 		}
-
 	}
 
 	return urlIndex, urlmap
+
 }
 
 func waitToLoad(ctxt context.Context, c *chromedp.CDP, url string) {
