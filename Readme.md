@@ -11,19 +11,19 @@ you can use the binary `main.exe` if you don't want to build from scratch.
 
 2) `godep go install`
 
-3) `go build main.go`
+3) `go build`
 
-4) generates distributable binary (main.exe or main).
+4) generates distributable binary (ps-scraper.exe or main).
 
 
 
 # Run
 
-`main.exe -u user@email.com -p password -c course-1-name -c course-2-name`
+`ps-scraper.exe -u user@email.com -p password -c course-1-name -c course-2-name`
 
 OR
 
-`main.exe --username user@email.com --password password --course course-1-name --course course-2-name`
+`ps-scraper.exe --username user@email.com --password password --course course-1-name --course course-2-name`
 
 You can have one or more courses. just repeat the --course/-c argument.
 chrome browser will be automatically opened/closed while scraping.
