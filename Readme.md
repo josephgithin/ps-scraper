@@ -1,7 +1,7 @@
 
 # Build
 
-you can use the binary `main.exe` if you don't want to build from scratch. 
+you can use the binary `ps-scraper.exe` if you don't want to build from scratch. 
 
 *To build*
 
@@ -13,7 +13,7 @@ you can use the binary `main.exe` if you don't want to build from scratch.
 
 3) `go build`
 
-4) generates distributable binary (ps-scraper.exe or main).
+4) generates distributable binary (ps-scraper.exe or main.exe).
 
 
 
