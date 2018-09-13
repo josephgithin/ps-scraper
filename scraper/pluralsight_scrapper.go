@@ -106,7 +106,7 @@ func doLogin(userName string, password string) chromedp.Tasks {
 		chromedp.SendKeys(`#Username`, userName),
 		chromedp.WaitVisible(`#Password`),
 		chromedp.Sleep(2 * time.Second),
-		chromedp.SendKeys(`#Password`, "whitedev"),
+		chromedp.SendKeys(`#Password`, password),
 		chromedp.Sleep(2 * time.Second),
 		chromedp.Click(`#login`),
 		chromedp.WaitVisible(`#prism-search-input`),
